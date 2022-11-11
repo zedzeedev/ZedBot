@@ -39,25 +39,10 @@ async def talk(ctx, msg: str):
     await ctx.send(msg)
 
 
-stop_cmd = False
 @bot.command(description="WARNING: DO NOT USE")
 async def avery(ctx):
-    stop_cmd = False
-    if stop_cmd == False:
-        for i in range(0, 100):
-            if stop_cmd == True:
-                break
-            else:
-                await ctx.respond("omg thats so fucking hot")
-        stop_cmd = True
-    else:
-        await ctx.respond("stopped")
-
-
-@bot.command(description="stops the madness")
-async def stop(ctx):
-    stop_cmd = True
-    await ctx.respond("stopped the madness")
+    for i in range(0, 100):
+        await ctx.respond("omg thats so fucking hot")
 
 
 bot.run(config["token"])
