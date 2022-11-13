@@ -19,15 +19,6 @@ async def on_message(message):
     pass
 
 
-cogs_list = [
-    "math"
-]
-
-
-for cog in cogs_list:
-    bot.load_extension(f"cogs.{cog}")
-
-
 @bot.command()
 async def lesbian(ctx):
     await ctx.respond("yeah, thats me")
@@ -43,6 +34,16 @@ async def talk(ctx, msg: str):
 async def avery(ctx):
     for i in range(0, 100):
         await ctx.respond("omg thats so fucking hot")
+
+
+cogs_list = [
+    "math",
+    "bomb_tag"
+]
+
+
+for cog in cogs_list:
+    bot.load_extension(f"cogs.{cog}")
 
 
 bot.run(config["token"])
