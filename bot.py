@@ -1,12 +1,19 @@
 import discord
 import json
-from time import sleep
+
 
 bot = discord.Bot()
 
 
 with open("config.json") as conf:
     config = json.load(fp=conf)
+
+
+class PollMenu(discord.ui.View):
+    def __init__():
+        super().__init__()
+    
+    
 
 
 @bot.event
@@ -38,7 +45,8 @@ async def avery(ctx):
 
 cogs_list = [
     "math",
-    "bomb_tag"
+    "bomb_tag",
+    "poll"
 ]
 
 
