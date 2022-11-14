@@ -26,7 +26,7 @@ class PollMenu(discord.ui.View):
     async def __on_button_callback(self, interaction: discord.Interaction):
         for button in self.option_buttons:
             if interaction.data["custom_id"] == button.custom_id:
-                current = self.option_buttons.index(button)\
+                current = self.option_buttons.index(button)
         # Uses the set custom ID of the button to get the index of its position
         
         current_option = self.options[current]
