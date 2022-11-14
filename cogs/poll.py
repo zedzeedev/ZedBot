@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
-from random import choices
-from string import ascii_letters, digits
-from bot import PollMenu
+from menus.pollmenu import PollMenu
 
 
 class Poll(commands.Cog):
