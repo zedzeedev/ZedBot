@@ -8,7 +8,6 @@ class PollMenu(discord.ui.View):
         super().__init__()
         self.voted = []
         self.options = []
-        self.embed = None
         self.description = description
         self.title = title
         
@@ -20,10 +19,10 @@ class PollMenu(discord.ui.View):
             self.option_buttons.append(discord.ui.Button(label=option["option"], style=discord.ButtonStyle.gray, custom_id="".join(choices(ascii_letters + digits, k=20))))
         
         for button in self.option_buttons:
-            button.callback = self.__on_button_callback
+            button.callback = self.on_button_callback
             self.add_item(button)
 
-    async def __on_button_callback(self, interaction: discord.Interaction):
+    async def on_button_callback(self, interaction: discord.Interaction):
         for button in self.option_buttons:
             if interaction.data["custom_id"] == button.custom_id:
                 current = self.option_buttons.index(button)
@@ -31,17 +30,35 @@ class PollMenu(discord.ui.View):
         
         current_option = self.options[current]
 
-        if interaction.user in self.voted:
-            await interaction.response.send_message("You already voted!", ephemeral=True)
+        if self.__voter_exists(interaction.user):
+            current_option["votes"] += 1
+            old_option = self.options[self.find_voter(interaction.user)["chosen"]]
+            old_option["votes"] -= 1
+            self.find_voter(interaction.user)["chosen"] = current
+            await interaction.response.send_message(f"You have changed your vote to {current_option['option']}", ephemeral=True)
         else:
             await interaction.response.send_message(f"You have voted for {current_option['option']}", ephemeral=True)
-            current_option['votes'] += 1
-            self.voted.append(interaction.user)
-            await interaction.message.edit(embed=self.create_embed())
+            current_option["votes"] += 1
+            self.voted.append({"user": interaction.user, "chosen": current})
+
+        await interaction.message.edit(embed=self.create_embed())
+
     
     def create_embed(self):
-        self.embed = discord.Embed(color=discord.colour.Color.random(), title=self.title, description=self.description)
+        embed = discord.Embed(color=discord.colour.Color.random(), title=self.title, description=self.description)
         
         for option in self.options:
-            self.embed.add_field(name=option["option"], value=f"{option['option']}, Voted: {option['votes']}", inline=False)
-        return self.embed
+            embed.add_field(name=option["option"], value=f"{option['option']}, Voted: {option['votes']}", inline=False)
+        return embed
+
+    def __voter_exists(self, user):
+        for voter in self.voted:
+            if voter["user"] == user:
+                return True
+        return False
+    
+    def find_voter(self, user):
+        for voter in self.voted:
+            if voter["user"] == user:
+                return voter
+        return user
