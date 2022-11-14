@@ -11,8 +11,8 @@ class StartMenu(discord.ui.View):
         self.match_started = False
 
     @discord.ui.button(label="Join game")
-    async def __join_button_callback(self, interaction: discord.Interaction):
-        if self.__plr_exists(interaction.user):
+    async def __join_button_callback(self, button, interaction: discord.Interaction):
+        if self.__plr_exists(interaction.user) or interaction.user == self.creator["creator"]:
             await interaction.response.send_message("You are already in the match!")
         else:
             char = random.choice(ascii_lowercase)
@@ -23,7 +23,7 @@ class StartMenu(discord.ui.View):
             await interaction.response.send_message(f"You have joined the game! Your character is {char}", ephemeral=True)
 
     @discord.ui.button(label="Start match")
-    async def __start_match_callback(self, interaction: discord.Interaction):
+    async def __start_match_callback(self, button, interaction: discord.Interaction):
         if interaction.user == self.creator['user']:
             interaction.response.send_message("Starting game...")
             self.match_started = True
