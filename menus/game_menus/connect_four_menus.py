@@ -128,6 +128,10 @@ class ConnectFourGame(discord.ui.View):
         if self.__find_horizontal_match():
             self.winner = self.current_player
             return True
+        if self.__find_diagonal_match():
+            self.winner = self.current_player
+            return True
+        return False
     
     def __find_vertical_match(self, row):
         diff = 1
@@ -158,7 +162,6 @@ class ConnectFourGame(discord.ui.View):
 
     def __find_horizontal_match(self):
         diff = 1
-        
         heights = self.__split_into_heights()
 
         for row in heights:
@@ -184,6 +187,34 @@ class ConnectFourGame(discord.ui.View):
                 diff = 1
 
         return False
+    
+    def __find_diagonal_match(self):
+        diff = 1
+        heights = self.__split_into_heights()
+        
+        for r, row in enumerate(heights):
+            for i, height in enumerate(row):
+                if i + 1 >= len(row) - 1 or r + 1 >= len(heights) - 1:
+                    if diff >= 1:
+                        return True
+                    diff = 1
+                else:
+                    next = heights[r + 1][i + 1]
+                    
+                    if not next["taken"]:
+                        if diff >= 4:
+                            return True
+                        diff = 1
+                    elif next["color"] == height["color"]:
+                        diff += 1
+                        if diff >= 4:
+                            return True
+        else:
+            if diff >= 4:
+                return True
+            diff = 1
+            
+        return False 
 
     def __split_into_heights(self):
         heights = []
