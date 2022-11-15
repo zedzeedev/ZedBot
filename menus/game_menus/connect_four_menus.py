@@ -136,7 +136,7 @@ class ConnectFourGame(discord.ui.View):
         diff = 1
 
         for i, cell in enumerate(row):
-            if i + 1 >= len(row) - 1:
+            if i + 1 > len(row) - 1:
                 if diff >= 4:
                     return True
                 diff = 1
@@ -165,7 +165,7 @@ class ConnectFourGame(discord.ui.View):
 
         for row in heights:
             for i, height in enumerate(row):
-                if i + 1 >= len(row) - 1:
+                if i + 1 > len(row) - 1:
                     if diff >= 4:
                         return True
                     diff = 1
@@ -188,14 +188,14 @@ class ConnectFourGame(discord.ui.View):
         return False
     
     def __find_diagonal_match(self):
-        for row in self.rows:
-            for i, cell in enumerate(row):
+        for r, row in enumerate(self.rows):
+            for c, cell in enumerate(row):
                 current_cell = cell
-                current = i
+                current = r
                 diff = 1
                 
                 while diff < 4:
-                    if current + 1 >= len(row) - 1 or current + 1 >= len(self.rows) - 1:
+                    if current + 1 > len(row) - 1 or current + 1 > len(self.rows) - 1:
                         if diff >= 4:
                             return True
                         break
@@ -213,12 +213,12 @@ class ConnectFourGame(discord.ui.View):
                     current += 1
                     current_cell = next_cell
                 current_cell = cell
-                current = i
-                current_x = i
+                current = r
+                current_x = c
                 diff = 1
                 
                 while diff < 4:
-                    if current_x - 1 < 0 or current + 1 >= len(self.rows) - 1:
+                    if current_x - 1 < 0 or current + 1 > len(self.rows) - 1:
                         if diff >= 4:
                             return True
                         break
