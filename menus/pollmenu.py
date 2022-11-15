@@ -22,6 +22,13 @@ class PollMenu(discord.ui.View):
             button.callback = self.on_button_callback
             self.add_item(button)
 
+    def create_embed(self):
+        embed = discord.Embed(color=discord.colour.Color.random(), title=self.title, description=self.description)
+        
+        for option in self.options:
+            embed.add_field(name=option["option"], value=f"{option['option']}, Voted: {option['votes']}", inline=False)
+        return embed
+
     async def on_button_callback(self, interaction: discord.Interaction):
         current = self.__find_index_from_id(interaction.data["custom_id"])
         # Uses the set custom ID of the button to get the index of its position
@@ -40,14 +47,6 @@ class PollMenu(discord.ui.View):
             self.voted.append({"user": interaction.user, "chosen": current})
 
         await interaction.message.edit(embed=self.create_embed())
-
-    
-    def create_embed(self):
-        embed = discord.Embed(color=discord.colour.Color.random(), title=self.title, description=self.description)
-        
-        for option in self.options:
-            embed.add_field(name=option["option"], value=f"{option['option']}, Voted: {option['votes']}", inline=False)
-        return embed
 
     def __voter_exists(self, user):
         for voter in self.voted:

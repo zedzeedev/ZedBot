@@ -19,8 +19,8 @@ class StartMenu(discord.ui.View):
     async def accept_button_callback(self, button, interaction: discord.Interaction):
         if self.__is_second_player(interaction.user):
             self.match_accepted = True
-            await interaction.response.send_message(f"You have joined {self.red_player}'s game of Connect Four!", ephemeral=True)
             game_menu = ConnectFourGame(self.red_player, self.yellow_player)
+            await interaction.response.send_message(embed=game_menu.create_embed(), view=game_menu)
         else:
             await interaction.response.send_message(f"You are not the requested user!", ephemeral=True)
     
@@ -44,24 +44,40 @@ class ConnectFourGame(discord.ui.View):
         self.rows = []
         self.row_buttons = []
 
-        for _ in range(0, 8):
+        for _ in range(1, 8):
             row = []
-            for col in range(0, 7):
-                row.append({"color": "none", "height": col})
+            for col in range(1, 7):
+                row.append({"color": "⬛", "height": col})
             self.rows.append(row)
         
-        for row in range(len(self.rows + 1)):
+        for row in range(1, len(self.rows) + 1):
             self.row_buttons.append(discord.ui.Button(
                 label=row, style=discord.ButtonStyle.gray, 
-                custom_id=''.join(random.choices(string.ascii_letters + string.digits))))
+                custom_id=''.join(random.choices(string.ascii_letters + string.digits, k=20))))
         
         for button in self.row_buttons:
             button.callback = self.button_callback_event
+            self.add_item(button)
     
+    def create_embed(self):
+        embed = discord.Embed(title="Test", description="Test")
+
+        s = ""
+        for c in range(0, 6):
+            for r, row in enumerate(self.rows):
+                col = row[c]
+
+                s += col["color"]
+                if r == len(self.rows) - 1:
+                    s += "\n"
+        
+        embed.description = s
+        return embed
+
     async def button_callback_event(self, interaction: discord.Interaction):
         current = self.__find_index_from_id(interaction.data["custom_id"])
 
-        interaction.response.send_message(current, ephemeral=True)
+        await interaction.response.send_message(current, ephemeral=True)
 
     def __find_index_from_id(self, id):
         for i, button in enumerate(self.row_buttons):
