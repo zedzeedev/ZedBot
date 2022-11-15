@@ -76,7 +76,7 @@ class ConnectFourGame(discord.ui.View):
         
         embed = discord.Embed(title="Connect Four", description=s)
         if self.winner != None:
-            embed.add_field(name="Winner!", value=f"{self.winner['plr']} has won the game of Connect Four!")
+            embed.add_field(name="Winner!", value=f"{self.winner['plr']} {self.winner['color']} has won the game of Connect Four!")
         return embed
 
     async def button_callback_event(self, interaction: discord.Interaction):
@@ -128,6 +128,10 @@ class ConnectFourGame(discord.ui.View):
         if self.__find_horizontal_match():
             self.winner = self.current_player
             return True
+        if self.__find_diagonal_match():
+            print("found diagonal")
+            self.winner = self.current_player
+            return True
     
     def __find_vertical_match(self, row):
         diff = 1
@@ -157,8 +161,7 @@ class ConnectFourGame(discord.ui.View):
         return False
 
     def __find_horizontal_match(self):
-        diff = 1
-        
+        diff = 1 
         heights = self.__split_into_heights()
 
         for row in heights:
@@ -184,6 +187,31 @@ class ConnectFourGame(discord.ui.View):
                 diff = 1
 
         return False
+    
+    def __find_diagonal_match(self):
+        diff = 1
+        
+        for r, row in enumerate(self.rows):
+            for c, cell in enumerate(row):
+                if r + 1 >= len(row) - 1 or c + 1 >= len(self.rows) - 1:
+                    if diff >= 4:
+                        return True
+                    diff = 1
+                else:
+                    next_cell = self.rows[r + 1][c + 1]
+                    
+                    if not next_cell["taken"]:
+                        if diff >= 4:
+                            return True
+                        diff = 1
+                    elif cell["color"] == next_cell["color"]:
+                        diff += 1
+                        if diff >= 4:
+                            return True
+                        
+        return False
+                
+                  
 
     def __split_into_heights(self):
         heights = []
