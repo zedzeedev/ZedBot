@@ -75,31 +75,38 @@ class ConnectFourGame(discord.ui.View):
                     s += "\n"
         
         embed = discord.Embed(title="Connect Four", description=s)
+        if self.winner != None:
+            embed.add_field(name="Winner!", value=f"{self.winner['plr']} has won the game of Connect Four!")
         return embed
 
     async def button_callback_event(self, interaction: discord.Interaction):
         current = self.__find_index_from_id(interaction.data["custom_id"])
-
-        if interaction.user == self.current_player["plr"]:
-            row = self.rows[current]
-            
-            c = self.__find_lowest_point(row=row)
-            if c == 6:
-                await interaction.response.send_message("This column is full!")
-            else:
-                col = row[c]
-                col["color"] = self.current_player["color"]
-                col["taken"] = True
-                self.__find_match()
-                self.current_player, self.other_player = self.other_player, self.current_player
-                await interaction.message.edit(embed=self.create_embed())
-        elif interaction.user == self.other_player["plr"]:
-            await interaction.response.send_message("It is not your turn yet!", ephemeral=True)
-        else:
-            await interaction.response.send_message("You are not a part of this game!", ephemeral=True)
-            
         
-        await interaction.response.send_message(current, ephemeral=True)
+        if self.winner == None:
+            if interaction.user == self.current_player["plr"]:
+                row = self.rows[current]
+                
+                c = self.__find_lowest_point(row=row)
+                if c == 6:
+                    await interaction.response.send_message("This column is full!", ephemeral=True)
+                else:
+                    col = row[c]
+                    col["color"] = self.current_player["color"]
+                    col["taken"] = True
+                    if self.__find_match():
+                        await interaction.message.edit(embed=self.create_embed())
+
+                    self.current_player, self.other_player = self.other_player, self.current_player
+                    await interaction.message.edit(embed=self.create_embed())
+            elif interaction.user == self.other_player["plr"]:
+                await interaction.response.send_message("It is not your turn yet!", ephemeral=True)
+            else:
+                await interaction.response.send_message("You are not a part of this game!", ephemeral=True)
+                
+            
+            await interaction.response.send_message(current, ephemeral=True)
+        else:
+            await interaction.response.send_message(f"{self.winner} already won!", ephemeral=True)
 
     def __find_index_from_id(self, id):
         for i, button in enumerate(self.row_buttons):
@@ -116,5 +123,32 @@ class ConnectFourGame(discord.ui.View):
     def __find_match(self):
         for row in self.rows:
             if self.__find_vertical_match(row=row):
-                print("found vertical")
+                self.winner = self.current_player
+                return True
     
+    def __find_vertical_match(self, row):
+        diff = 1
+
+        for i, col in enumerate(row):
+            if i + 1 >= len(row) - 1:
+                if diff >= 4:
+                    return True
+                diff = 1
+            else:
+                next = row[i + 1]
+
+                if not next["taken"]:
+                    if diff >= 4:
+                        return True
+                    diff = 1
+
+                if next["color"] == col["color"]:
+                    diff += 1
+                    if diff >= 4:
+                        return True
+        else:
+            if diff >= 4:
+                return True
+            diff = 1
+    
+        return False
