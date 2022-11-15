@@ -231,7 +231,6 @@ class ConnectFourGame(discord.ui.View):
                             break
                         elif next_cell["color"] == current_cell["color"]:
                             diff += 1
-                            print(diff)
                             if diff >= 4:
                                 return True
                     current += 1
