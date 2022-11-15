@@ -118,31 +118,3 @@ class ConnectFourGame(discord.ui.View):
             if self.__find_vertical_match(row=row):
                 print("found vertical")
     
-    def __find_vertical_match(self, row):
-        current = 0
-        start = 0
-        for col in row:
-            if current + 1 <= len(row) - 1:
-                if not col["taken"]:
-                    diff = 1 + current - start
-                    if diff >= 4:
-                        return True
-                    start = 0
-                else:
-                    if col["color"] != row[current + 1]["color"]:
-                        diff = 1 + current - start
-                        if diff >= 4:
-                            return True
-                        start = 0
-                    else:
-                        current += 1
-                        diff = 1 + current - start
-                        if diff >= 4:
-                            return True
-            else:
-                diff = 1 + current - start
-                if diff >= 4:
-                    return True
-                start = 0
-        
-        return False
