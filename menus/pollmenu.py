@@ -23,18 +23,16 @@ class PollMenu(discord.ui.View):
             self.add_item(button)
 
     async def on_button_callback(self, interaction: discord.Interaction):
-        for button in self.option_buttons:
-            if interaction.data["custom_id"] == button.custom_id:
-                current = self.option_buttons.index(button)
+        current = self.__find_index_from_id(interaction.data["custom_id"])
         # Uses the set custom ID of the button to get the index of its position
         
         current_option = self.options[current]
 
         if self.__voter_exists(interaction.user):
             current_option["votes"] += 1
-            old_option = self.options[self.find_voter(interaction.user)["chosen"]]
+            old_option = self.options[self.__find_voter(interaction.user)["chosen"]]
             old_option["votes"] -= 1
-            self.find_voter(interaction.user)["chosen"] = current
+            self.__find_voter(interaction.user)["chosen"] = current
             await interaction.response.send_message(f"You have changed your vote to {current_option['option']}", ephemeral=True)
         else:
             await interaction.response.send_message(f"You have voted for {current_option['option']}", ephemeral=True)
@@ -57,8 +55,14 @@ class PollMenu(discord.ui.View):
                 return True
         return False
     
-    def find_voter(self, user):
+    def __find_voter(self, user):
         for voter in self.voted:
             if voter["user"] == user:
                 return voter
         return user
+
+    def __find_index_from_id(self, id):
+        for i, button in enumerate(self.option_buttons):
+            if button.custom_id == id:
+                return i
+        return 0
