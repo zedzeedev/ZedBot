@@ -129,7 +129,6 @@ class ConnectFourGame(discord.ui.View):
             self.winner = self.current_player
             return True
         if self.__find_diagonal_match():
-            print("found diagonal")
             self.winner = self.current_player
             return True
     
@@ -190,7 +189,7 @@ class ConnectFourGame(discord.ui.View):
     
     def __find_diagonal_match(self):
         for row in self.rows:
-            for cell in row:
+            for i, cell in enumerate(row):
                 current_cell = cell
                 current = 0
                 diff = 1
@@ -213,7 +212,31 @@ class ConnectFourGame(discord.ui.View):
                                 return True
                     current += 1
                     current_cell = next_cell
-                    print("yo we out here")
+                current_cell = cell
+                current = 0
+                current_x = i
+                diff = 1
+                
+                while diff < 4:
+                    if current_x - 1 < 0 or current + 1 >= len(self.rows) - 1:
+                        if diff >= 4:
+                            return True
+                        break
+                    else:
+                        next_cell = self.rows[current + 1][current_x - 1]
+                        
+                        if not next_cell["taken"]:
+                            if diff >= 4:
+                                return True
+                            break
+                        elif next_cell["color"] == current_cell["color"]:
+                            diff += 1
+                            print(diff)
+                            if diff >= 4:
+                                return True
+                    current += 1
+                    current_x -= 1
+                    current_cell = next_cell
 
         return False
                 
