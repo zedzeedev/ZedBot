@@ -45,13 +45,15 @@ class ConnectFourGame(discord.ui.View):
         self.yellow_player = yellow_player
         self.other_player = yellow_player
         self.current_player = red_player
-        self.rows = {}
+        self.rows = []
         self.row_buttons = []
         self.winner = None
 
         for r in range(1, 8):
-            for col in range(1, 7):
-                self.rows[r, col] = {"color": "⬛", "taken": False}
+            row = []
+            for cell in range(1, 7):
+                row.append({"color": "⬛", "height": cell, "taken": False, "row": r})
+            self.rows.append(row)
         
         for row in range(1, len(self.rows) + 1):
             self.row_buttons.append(discord.ui.Button(
@@ -66,9 +68,9 @@ class ConnectFourGame(discord.ui.View):
         s = ""
         for c in range(5, -1, -1):
             for r, row in enumerate(self.rows):
-                col = row[c]
+                cell = row[c]
 
-                s += col["color"]
+                s += cell["color"]
                 if r == len(self.rows) - 1:
                     s += "\n"
         
@@ -88,9 +90,9 @@ class ConnectFourGame(discord.ui.View):
                 if c == 6:
                     await interaction.response.send_message("This column is full!", ephemeral=True)
                 else:
-                    col = row[c]
-                    col["color"] = self.current_player["color"]
-                    col["taken"] = True
+                    cell = row[c]
+                    cell["color"] = self.current_player["color"]
+                    cell["taken"] = True
                     if self.__find_match():
                         await interaction.message.edit(embed=self.create_embed())
 
@@ -112,116 +114,88 @@ class ConnectFourGame(discord.ui.View):
                 return i
         return 0
     
-    # def __find_lowest_point(self, row):
-    #     for i, col in enumerate(row):
-    #         if not col["taken"]:
-    #             return i
-    #     return 6
+    def __find_lowest_point(self, row):
+        for i, cell in enumerate(row):
+            if not cell["taken"]:
+                return i
+        return 6
     
-    # def __find_match(self):
-    #     for row in self.rows:
-    #         if self.__find_vertical_match(row=row):
-    #             self.winner = self.current_player
-    #             print("vertical match")
-    #             return True
-    #     if self.__find_horizontal_match():
-    #         self.winner = self.current_player
-    #         print("horizontal match")
-    #         return True
-    #     if self.__find_diagonal_match():
-    #         self.winner = self.current_player
-    #         print("diagonal match")
-    #         return True
-    #     return False
+    def __find_match(self):
+        for row in self.rows:
+            if self.__find_vertical_match(row=row):
+                self.winner = self.current_player
+                return True
+        if self.__find_horizontal_match():
+            self.winner = self.current_player
+            return True
     
-    # def __find_vertical_match(self, row):
-    #     diff = 1
+    def __find_vertical_match(self, row):
+        diff = 1
 
-    #     for i, col in enumerate(row):
-    #         if i + 1 >= len(row) - 1:
-    #             if diff >= 4:
-    #                 return True
-    #             diff = 1
-    #         else:
-    #             next = row[i + 1]
+        for i, cell in enumerate(row):
+            if i + 1 >= len(row) - 1:
+                if diff >= 4:
+                    return True
+                diff = 1
+            else:
+                next = row[i + 1]
 
-    #             if not next["taken"]:
-    #                 if diff >= 4:
-    #                     return True
-    #                 diff = 1
+                if not next["taken"]:
+                    if diff >= 4:
+                        return True
+                    diff = 1
 
-    #             if next["color"] == col["color"]:
-    #                 diff += 1
-    #                 if diff >= 4:
-    #                     return True
-    #     else:
-    #         if diff >= 4:
-    #             return True
-    #         diff = 1
+                if next["color"] == cell["color"]:
+                    diff += 1
+                    if diff >= 4:
+                        return True
+        else:
+            if diff >= 4:
+                return True
+            diff = 1
     
-    #     return False
+        return False
 
-    # def __find_horizontal_match(self):
-    #     diff = 1
-    #     heights = self.__split_into_heights()
-
-    #     for row in heights:
-    #         for i, height in enumerate(row):
-    #             if i + 1 >= len(row) - 1:
-    #                 if diff >= 4:
-    #                     return True
-    #                 diff = 1
-    #             else:
-    #                 next = row[i + 1]
-
-    #                 if not next["taken"]:
-    #                     if diff >= 4:
-    #                         return True
-    #                     diff = 1
-    #                 elif next["color"] == height["color"]:
-    #                     diff += 1
-    #                     if diff >= 4:
-    #                         return True
-    #         else:
-    #             if diff >= 4:
-    #                 return True
-    #             diff = 1
-
-    #     return False
-    
-    # def __find_diagonal_match(self):
-    #     diff = 1
-    #     currrent_x = 0
-    #     current_y = 0
-    #     middle = self.rows[self.rows / 2]
+    def __find_horizontal_match(self):
+        diff = 1
         
-    #     print(middle)
+        heights = self.__split_into_heights()
 
-    # def __split_into_heights(self):
-    #     heights = []
+        for row in heights:
+            for i, height in enumerate(row):
+                if i + 1 >= len(row) - 1:
+                    if diff >= 4:
+                        return True
+                    diff = 1
+                else:
+                    next = row[i + 1]
 
-    #     for row in self.rows:
-    #         for col in row:
-    #             h = col["height"]
+                    if not next["taken"]:
+                        if diff >= 4:
+                            return True
+                        diff = 1
+                    elif next["color"] == height["color"]:
+                        diff += 1
+                        if diff >= 4:
+                            return True
+            else:
+                if diff >= 4:
+                    return True
+                diff = 1
 
-    #             if h >= len(heights):
-    #                 heights.append([col])
-    #             else:
-    #                 heights[h - 1].append(col)
+        return False
+
+    def __split_into_heights(self):
+        heights = []
+
+        for row in self.rows:
+            for cell in row:
+                h = cell["height"]
+
+                if h >= len(heights):
+                    heights.append([cell])
+                else:
+                    heights[h - 1].append(cell)
         
-    #     return heights
+        return heights
     
-    # def __split_into_diagonals(self):
-    #     heights = []
-
-    #     for row in self.rows:
-    #         for col in row:
-    #             h = col["height"]
-
-    #             if h >= len(heights):
-    #                 heights.append([col])
-    #             else:
-    #                 heights[h - 1].append(col)
-        
-    #     return heights
-        
