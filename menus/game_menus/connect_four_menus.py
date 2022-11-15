@@ -17,10 +17,12 @@ class StartMenu(discord.ui.View):
     
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
     async def accept_button_callback(self, button, interaction: discord.Interaction):
-        if self.__is_second_player(interaction.user):
+        if self.__is_second_player(interaction.user) and not self.match_accepted:
             self.match_accepted = True
             game_menu = ConnectFourGame(self.red_player, self.yellow_player)
             await interaction.response.send_message(embed=game_menu.create_embed(), view=game_menu)
+        elif self.match_accepted:
+            await interaction.response.send_message(f"This match has already started!")
         else:
             await interaction.response.send_message(f"You are not the requested user!", ephemeral=True)
     
@@ -45,6 +47,7 @@ class ConnectFourGame(discord.ui.View):
         self.current_player = red_player
         self.rows = []
         self.row_buttons = []
+        self.winner = None
 
         for _ in range(1, 8):
             row = []
@@ -80,13 +83,14 @@ class ConnectFourGame(discord.ui.View):
         if interaction.user == self.current_player["plr"]:
             row = self.rows[current]
             
-            c = self.find_lowest_point(row=row)
+            c = self.__find_lowest_point(row=row)
             if c == 6:
                 await interaction.response.send_message("This column is full!")
             else:
                 col = row[c]
                 col["color"] = self.current_player["color"]
                 col["taken"] = True
+                self.__find_match()
                 self.current_player, self.other_player = self.other_player, self.current_player
                 await interaction.message.edit(embed=self.create_embed())
         elif interaction.user == self.other_player["plr"]:
@@ -103,8 +107,42 @@ class ConnectFourGame(discord.ui.View):
                 return i
         return 0
     
-    def find_lowest_point(self, row):
+    def __find_lowest_point(self, row):
         for i, col in enumerate(row):
-            if col["taken"] != True:
+            if not col["taken"]:
                 return i
         return 6
+    
+    def __find_match(self):
+        for row in self.rows:
+            if self.__find_vertical_match(row=row):
+                print("found vertical")
+    
+    def __find_vertical_match(self, row):
+        current = 0
+        start = 0
+        for col in row:
+            if current + 1 <= len(row) - 1:
+                if not col["taken"]:
+                    diff = 1 + current - start
+                    if diff >= 4:
+                        return True
+                    start = 0
+                else:
+                    if col["color"] != row[current + 1]["color"]:
+                        diff = 1 + current - start
+                        if diff >= 4:
+                            return True
+                        start = 0
+                    else:
+                        current += 1
+                        diff = 1 + current - start
+                        if diff >= 4:
+                            return True
+            else:
+                diff = 1 + current - start
+                if diff >= 4:
+                    return True
+                start = 0
+        
+        return False
