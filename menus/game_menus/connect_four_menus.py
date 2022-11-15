@@ -189,30 +189,34 @@ class ConnectFourGame(discord.ui.View):
         return False
     
     def __find_diagonal_match(self):
-        diff = 1
-        
-        for r, row in enumerate(self.rows):
-            for c, cell in enumerate(row):
-                if r + 1 >= len(row) - 1 or c + 1 >= len(self.rows) - 1:
-                    if diff >= 4:
-                        return True
-                    diff = 1
-                else:
-                    next_cell = self.rows[r + 1][c + 1]
-                    
-                    if not next_cell["taken"]:
+        for row in self.rows:
+            for cell in row:
+                current_cell = cell
+                current = 0
+                diff = 1
+                
+                while diff < 4:
+                    if current + 1 >= len(row) - 1 or current + 1 >= len(self.rows) - 1:
                         if diff >= 4:
                             return True
-                        diff = 1
-                    elif cell["color"] == next_cell["color"]:
-                        diff += 1
-                        if diff >= 4:
-                            return True
+                        break
+                    else:
+                        next_cell = self.rows[current + 1][current + 1]
                         
+                        if not next_cell["taken"]:
+                            if diff >= 4:
+                                return True
+                            break
+                        elif next_cell["color"] == current_cell["color"]:
+                            diff += 1
+                            if diff >= 4:
+                                return True
+                    current += 1
+                    current_cell = next_cell
+                    print("yo we out here")
+
         return False
                 
-                  
-
     def __split_into_heights(self):
         heights = []
 
