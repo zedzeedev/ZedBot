@@ -49,10 +49,10 @@ class ConnectFourGame(discord.ui.View):
         self.row_buttons = []
         self.winner = None
 
-        for _ in range(1, 8):
+        for r in range(1, 8):
             row = []
             for col in range(1, 7):
-                row.append({"color": "⬛", "height": col, "taken": False})
+                row.append({"color": "⬛", "height": col, "taken": False, "row": r})
             self.rows.append(row)
         
         for row in range(1, len(self.rows) + 1):
@@ -106,7 +106,7 @@ class ConnectFourGame(discord.ui.View):
             
             await interaction.response.send_message(current, ephemeral=True)
         else:
-            await interaction.response.send_message(f"{self.winner} already won!", ephemeral=True)
+            await interaction.response.send_message(f"{self.winner['plr']} already won!", ephemeral=True)
 
     def __find_index_from_id(self, id):
         for i, button in enumerate(self.row_buttons):
@@ -125,6 +125,9 @@ class ConnectFourGame(discord.ui.View):
             if self.__find_vertical_match(row=row):
                 self.winner = self.current_player
                 return True
+        if self.__find_horizontal_match():
+            self.winner = self.current_player
+            return True
     
     def __find_vertical_match(self, row):
         diff = 1
@@ -152,3 +155,46 @@ class ConnectFourGame(discord.ui.View):
             diff = 1
     
         return False
+
+    def __find_horizontal_match(self):
+        diff = 1
+        
+        heights = self.__split_into_heights()
+
+        for row in heights:
+            for i, height in enumerate(row):
+                if i + 1 >= len(row) - 1:
+                    if diff >= 4:
+                        return True
+                    diff = 1
+                else:
+                    next = row[i + 1]
+
+                    if not next["taken"]:
+                        if diff >= 4:
+                            return True
+                        diff = 1
+                    elif next["color"] == height["color"]:
+                        diff += 1
+                        if diff >= 4:
+                            return True
+            else:
+                if diff >= 4:
+                    return True
+                diff = 1
+
+        return False
+
+    def __split_into_heights(self):
+        heights = []
+
+        for row in self.rows:
+            for col in row:
+                h = col["height"]
+
+                if h >= len(heights):
+                    heights.append([col])
+                else:
+                    heights[h - 1].append(col)
+        
+        return heights
