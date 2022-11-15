@@ -191,7 +191,7 @@ class ConnectFourGame(discord.ui.View):
         for row in self.rows:
             for i, cell in enumerate(row):
                 current_cell = cell
-                current = 0
+                current = i
                 diff = 1
                 
                 while diff < 4:
@@ -213,7 +213,7 @@ class ConnectFourGame(discord.ui.View):
                     current += 1
                     current_cell = next_cell
                 current_cell = cell
-                current = 0
+                current = i
                 current_x = i
                 diff = 1
                 
