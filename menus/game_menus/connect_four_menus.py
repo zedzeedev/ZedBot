@@ -52,7 +52,7 @@ class ConnectFourGame(discord.ui.View):
         for r in range(1, 8):
             row = []
             for col in range(1, 7):
-                row.append({"color": "⬛", "height": col, "taken": False, "row": r})
+                row.append({"color": "⬛", "height": col, "taken": False})
             self.rows.append(row)
         
         for row in range(1, len(self.rows) + 1):
@@ -124,12 +124,15 @@ class ConnectFourGame(discord.ui.View):
         for row in self.rows:
             if self.__find_vertical_match(row=row):
                 self.winner = self.current_player
+                print("vertical match")
                 return True
         if self.__find_horizontal_match():
             self.winner = self.current_player
+            print("horizontal match")
             return True
         if self.__find_diagonal_match():
             self.winner = self.current_player
+            print("diagonal match")
             return True
         return False
     
@@ -195,7 +198,7 @@ class ConnectFourGame(discord.ui.View):
         for r, row in enumerate(heights):
             for i, height in enumerate(row):
                 if i + 1 >= len(row) - 1 or r + 1 >= len(heights) - 1:
-                    if diff >= 1:
+                    if diff >= 4:
                         return True
                     diff = 1
                 else:
