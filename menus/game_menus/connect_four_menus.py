@@ -11,7 +11,7 @@ class StartMenu(discord.ui.View):
         self.match_accepted = False
     
     def create_embed(self):
-        embed = discord.Embed(title="Connect Four", description=f"{self.red_player} would like to play Connect Four with {self.yellow_player}")
+        embed = discord.Embed(title="Connect Four", description=f"{self.red_player['plr']} would like to play Connect Four with {self.yellow_player['plr']}")
 
         return embed
     
@@ -28,12 +28,12 @@ class StartMenu(discord.ui.View):
     async def decline_button_callback(self, button, interaction: discord.Interaction):
         if self.__is_second_player(interaction.user):
             self.match_accepted = False
-            await interaction.response.send_message(f"{self.yellow_player} has declined your Connect Four request!")
+            await interaction.response.send_message(f"{self.yellow_player['plr']} has declined your Connect Four request!")
         else:
             await interaction.response.send_message(f"You are not the requested user!")
             
     def __is_second_player(self, plr: discord.User):
-        return plr == self.yellow_player
+        return plr == self.yellow_player["plr"]
 
 
 class ConnectFourGame(discord.ui.View):
@@ -41,13 +41,15 @@ class ConnectFourGame(discord.ui.View):
         super().__init__()
         self.red_player = red_player
         self.yellow_player = yellow_player
+        self.other_player = yellow_player
+        self.current_player = red_player
         self.rows = []
         self.row_buttons = []
 
         for _ in range(1, 8):
             row = []
             for col in range(1, 7):
-                row.append({"color": "⬛", "height": col})
+                row.append({"color": "⬛", "height": col, "taken": False})
             self.rows.append(row)
         
         for row in range(1, len(self.rows) + 1):
@@ -60,10 +62,8 @@ class ConnectFourGame(discord.ui.View):
             self.add_item(button)
     
     def create_embed(self):
-        embed = discord.Embed(title="Test", description="Test")
-
         s = ""
-        for c in range(0, 6):
+        for c in range(5, -1, -1):
             for r, row in enumerate(self.rows):
                 col = row[c]
 
@@ -71,12 +71,30 @@ class ConnectFourGame(discord.ui.View):
                 if r == len(self.rows) - 1:
                     s += "\n"
         
-        embed.description = s
+        embed = discord.Embed(title="Connect Four", description=s)
         return embed
 
     async def button_callback_event(self, interaction: discord.Interaction):
         current = self.__find_index_from_id(interaction.data["custom_id"])
 
+        if interaction.user == self.current_player["plr"]:
+            row = self.rows[current]
+            
+            c = self.find_lowest_point(row=row)
+            if c == 6:
+                await interaction.response.send_message("This column is full!")
+            else:
+                col = row[c]
+                col["color"] = self.current_player["color"]
+                col["taken"] = True
+                self.current_player, self.other_player = self.other_player, self.current_player
+                await interaction.message.edit(embed=self.create_embed())
+        elif interaction.user == self.other_player["plr"]:
+            await interaction.response.send_message("It is not your turn yet!", ephemeral=True)
+        else:
+            await interaction.response.send_message("You are not a part of this game!", ephemeral=True)
+            
+        
         await interaction.response.send_message(current, ephemeral=True)
 
     def __find_index_from_id(self, id):
@@ -84,3 +102,9 @@ class ConnectFourGame(discord.ui.View):
             if button.custom_id == id:
                 return i
         return 0
+    
+    def find_lowest_point(self, row):
+        for i, col in enumerate(row):
+            if col["taken"] != True:
+                return i
+        return 6

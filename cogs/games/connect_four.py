@@ -9,7 +9,7 @@ class ConnectFour(commands.Cog):
         
     @discord.slash_command(name="connect4-play", description="Starts a game of connect4")
     async def connectfour_play(self, ctx, user: discord.User):
-        start_menu = StartMenu(player1=ctx.author, player2=user)
+        start_menu = StartMenu(player1={"plr": ctx.author, "color": "🟥"}, player2={"plr": user, "color": "🟨"})
         
         embed = start_menu.create_embed()
         await ctx.respond("Sending message...", ephemeral=True)
