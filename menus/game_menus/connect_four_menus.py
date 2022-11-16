@@ -190,19 +190,20 @@ class ConnectFourGame(discord.ui.View):
     def __find_diagonal_match(self):
         heights = self.__split_into_heights()
 
-        for row in heights:
-            for i, height in enumerate(row):
+        for r, row in enumerate(heights):
+            for c, height in enumerate(row):
                 current_cell = height
-                current = 0
+                current_x = c
+                current_y = r
                 diff = 1
                 
                 while True:
-                    if current + 1 > heights or current + 1 > row:
+                    if current_y + 1 >= len(heights) or current_x + 1 >= len(row):
                         if diff >= 4:
                             return True
                         break
                     else:
-                        next_cell = heights[current + 1][current + 1]
+                        next_cell = heights[current_y + 1][current_x + 1]
                         
                         if not next_cell["taken"]:
                             if diff >= 4:
@@ -212,7 +213,31 @@ class ConnectFourGame(discord.ui.View):
                             diff += 1
                             if diff >= 4:
                                 return True
-                        current += 1
+                    current_x += 1
+                    current_y += 1
+                current_cell = height
+                current_x = c
+                current_y = r
+                diff = 1
+                
+                while True:
+                    if current_y + 1 >= len(heights) or current_x - 1 <= len(row):
+                        if diff >= 4:
+                            return True
+                        break
+                    else:
+                        next_cell = heights[current_y + 1][current_x - 1]
+                        
+                        if not next_cell["taken"]:
+                            if diff >= 4:
+                                return True
+                            break
+                        elif current_cell["color"] == next_cell["color"]:
+                            diff += 1
+                            if diff >= 4:
+                                return True
+                    current_x -= 1
+                    current_y += 1
                 
     def __split_into_heights(self):
         heights = []
