@@ -260,6 +260,7 @@ class ConnectFourGame(discord.ui.View):
         embed = discord.Embed(title="Connect Four", description=str(self.board))
         if self.winner != None:
             embed.add_field(name="Winner!", value=f"{self.winner['plr']} {self.winner['color']} has won the game of Connect Four!")
+        embed.set_footer(text=f"It is {self.current_player['plr']}'s turn.")
         return embed
 
     async def button_callback_event(self, interaction: discord.Interaction):
