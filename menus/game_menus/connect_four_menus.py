@@ -268,12 +268,15 @@ class ConnectFourGame(discord.ui.View):
         current = self.__find_index_from_id(interaction.data["custom_id"])
         
         if self.winner == None:
+            await interaction.response.send_message(current + 1, ephemeral=True)
+            followup = interaction.followup
+
             if interaction.user == self.current_player["plr"]:
                 row = self.board[current]
                 
                 c = self.board.get_lowest_point(row=row)
                 if c == 6:
-                    await interaction.response.send_message("This column is full!", ephemeral=True)
+                    await followup.send("This column is full!", ephemeral=True)
                 else:
                     self.board.change_cell(row=row, index=c, color=self.current_player["color"])
                     if self.board.winner:
@@ -283,12 +286,11 @@ class ConnectFourGame(discord.ui.View):
                     self.current_player, self.other_player = self.other_player, self.current_player
                     await interaction.message.edit(embed=self.create_embed())
             elif interaction.user == self.other_player["plr"]:
-                await interaction.response.send_message("It is not your turn yet!", ephemeral=True)
+                await followup.send("It is not your turn yet!", ephemeral=True)
             else:
-                await interaction.response.send_message("You are not a part of this game!", ephemeral=True)
+                await followup.send("You are not a part of this game!", ephemeral=True)
                 
             
-            await interaction.response.send_message(current + 1, ephemeral=True)
         else:
             await interaction.response.send_message(f"{self.winner['plr']} already won!", ephemeral=True)
 
