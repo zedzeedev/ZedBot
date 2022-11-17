@@ -38,6 +38,172 @@ class StartMenu(discord.ui.View):
         return plr == self.yellow_player["plr"]
 
 
+class Cell(dict):
+    def __init__(self, color, taken):
+        self['color'] = color
+        self['taken'] = taken
+    
+    def __repr__(self) -> str:
+        return self['color']
+
+
+class Row:
+    def __init__(self, *items):
+        self.items = []
+        for item in items:
+            self.items.append(item)
+
+    def __getitem__(self, key):
+        return self.items[key]
+    
+    def __setitem__(self, key, value):
+        self.items[key] = value
+    
+    def __repr__(self) -> str:
+        s = ""
+        for cell in self.items:
+            s += str(cell)
+        
+        return s
+    
+    def __len__(self):
+        return len(self.items)
+    
+    def append(self, item):
+        self.items.append(item)
+
+
+class Board:
+    def __init__(self, x, y):
+        self.width = x
+        self.height = y
+        self.rows = []
+        self.winner = False
+        for r in range(x):
+            row = Row()
+            for c in range(y):
+                row.append(Cell(color='⬛', taken=False))
+            self.rows.append(row)
+    
+    def __getitem__(self, key):
+        return self.rows[key]
+    
+    def __repr__(self) -> str:
+        s = ""
+
+        zipped = list(zip(*self.rows))
+        for i in range(len(zipped) - 1, -1, - 1):
+            for element in zipped[i]:
+                s += str(element)
+            s += '\n'
+
+        return s
+    
+    def get_lowest_point(self, row):
+        for i, cell in enumerate(row):
+            if not cell['taken']:
+                return i
+        return self.height
+
+    def change_cell(self, row, index, color):
+        if index != self.height:
+            row[index]['color'] = color
+            row[index]['taken'] = True
+        else:
+            print("This column is full!")
+        if self.__check_for_match():
+            self.winner = True
+
+    def __check_for_match(self):
+        if self.__check_for_vertical() or self.__check_for_horizontal() or self.__check_for_diagonal():
+            return True
+
+    def __check_for_vertical(self):
+        for row in self.rows:
+            diff = 1
+            for i, cell in enumerate(row):
+                if not i + 1 >= len(row) - 1:
+                    next = row[i + 1]
+
+                    if next['taken'] and next['color'] == cell['color']:
+                        diff += 1
+                if diff >= 4:
+                    return True
+        
+        return False
+    
+    def __check_for_horizontal(self):
+        zipped = list(zip(*self.rows))
+
+        for row in zipped:
+            diff = 1
+            for i, cell in enumerate(row):
+                if not i + 1 >= len(row) - 1:
+                    next = row[i + 1]
+
+                    if next['taken'] and next['color'] == cell['color']:
+                        diff += 1
+                if diff >= 4:
+                    return True
+        
+        return False
+
+    def __check_for_diagonal(self):
+        for r, row in enumerate(self.rows):
+            for i, cell in enumerate(row):
+                diff = 1
+                current_x = i
+                current_y = r
+                current_cell = cell
+
+                while True:
+                    if current_x + 1 >= len(row) or current_y + 1 >= len(self.rows):
+                        if diff >= 4:
+                            return True
+                        break
+                    else:
+                        next_cell = self.rows[current_y + 1][current_x + 1]
+
+                        if not next_cell["taken"]:
+                            if diff >= 4:
+                                return True
+                            break
+                        elif next_cell["color"] == current_cell["color"]:
+                            diff += 1
+                            if diff >= 4:
+                                return True
+                    current_x += 1
+                    current_y += 1
+                    current_cell = next_cell
+
+                diff = 1
+                current_x = i
+                current_y = r
+                current_cell = cell
+
+                while True:
+                    if current_x - 1 >= len(row) or current_y + 1 >= len(self.rows):
+                        if diff >= 4:
+                            return True
+                        break
+                    else:
+                        next_cell = self.rows[current_y + 1][current_x - 1]
+
+                        if not next_cell["taken"]:
+                            if diff >= 4:
+                                return True
+                            break
+                        elif next_cell["color"] == current_cell["color"]:
+                            diff += 1
+                            if diff >= 4:
+                                return True
+                    current_x -= 1
+                    current_y += 1
+                    current_cell = next_cell      
+
+        return False
+
+
 class ConnectFourGame(discord.ui.View):
     def __init__(self, red_player, yellow_player):
         super().__init__()
@@ -45,17 +211,12 @@ class ConnectFourGame(discord.ui.View):
         self.yellow_player = yellow_player
         self.other_player = yellow_player
         self.current_player = red_player
-        self.rows = []
         self.row_buttons = []
         self.winner = None
+        self.board = Board(7, 6)
 
-        for r in range(1, 8):
-            row = []
-            for cell in range(1, 7):
-                row.append({"color": "⬛", "height": cell, "taken": False, "row": r})
-            self.rows.append(row)
         
-        for row in range(1, len(self.rows) + 1):
+        for row in range(1, 8):
             self.row_buttons.append(discord.ui.Button(
                 label=row, style=discord.ButtonStyle.gray, 
                 custom_id=''.join(random.choices(string.ascii_letters + string.digits, k=20))))
@@ -65,16 +226,7 @@ class ConnectFourGame(discord.ui.View):
             self.add_item(button)
     
     def create_embed(self):
-        s = ""
-        for c in range(5, -1, -1):
-            for r, row in enumerate(self.rows):
-                cell = row[c]
-
-                s += cell["color"]
-                if r == len(self.rows) - 1:
-                    s += "\n"
-        
-        embed = discord.Embed(title="Connect Four", description=s)
+        embed = discord.Embed(title="Connect Four", description=str(self.board))
         if self.winner != None:
             embed.add_field(name="Winner!", value=f"{self.winner['plr']} {self.winner['color']} has won the game of Connect Four!")
         return embed
@@ -84,16 +236,15 @@ class ConnectFourGame(discord.ui.View):
         
         if self.winner == None:
             if interaction.user == self.current_player["plr"]:
-                row = self.rows[current]
+                row = self.board[current]
                 
-                c = self.__find_lowest_point(row=row)
+                c = self.board.get_lowest_point(row=row)
                 if c == 6:
                     await interaction.response.send_message("This column is full!", ephemeral=True)
                 else:
-                    cell = row[c]
-                    cell["color"] = self.current_player["color"]
-                    cell["taken"] = True
-                    if self.__find_match():
+                    self.board.change_cell(row=row, index=c, color=self.current_player["color"])
+                    if self.board.winner:
+                        self.winner = self.current_player
                         await interaction.message.edit(embed=self.create_embed())
 
                     self.current_player, self.other_player = self.other_player, self.current_player
@@ -104,7 +255,7 @@ class ConnectFourGame(discord.ui.View):
                 await interaction.response.send_message("You are not a part of this game!", ephemeral=True)
                 
             
-            await interaction.response.send_message(current, ephemeral=True)
+            await interaction.response.send_message(current + 1, ephemeral=True)
         else:
             await interaction.response.send_message(f"{self.winner['plr']} already won!", ephemeral=True)
 
@@ -113,143 +264,4 @@ class ConnectFourGame(discord.ui.View):
             if button.custom_id == id:
                 return i
         return 0
-    
-    def __find_lowest_point(self, row):
-        for i, cell in enumerate(row):
-            if not cell["taken"]:
-                return i
-        return 6
-    
-    def __find_match(self):
-        for row in self.rows:
-            if self.__find_vertical_match(row=row):
-                self.winner = self.current_player
-                return True
-        if self.__find_horizontal_match():
-            self.winner = self.current_player
-            return True
-        if self.__find_diagonal_match():
-            self.winner = self.current_player
-            return True
-    
-    def __find_vertical_match(self, row):
-        diff = 1
-
-        for i, cell in enumerate(row):
-            if i + 1 > len(row) - 1:
-                if diff >= 4:
-                    return True
-                diff = 1
-            else:
-                next = row[i + 1]
-
-                if not next["taken"]:
-                    if diff >= 4:
-                        return True
-                    diff = 1
-
-                if next["color"] == cell["color"]:
-                    diff += 1
-                    if diff >= 4:
-                        return True
-        else:
-            if diff >= 4:
-                return True
-            diff = 1
-    
-        return False
-
-    def __find_horizontal_match(self):
-        diff = 1 
-        heights = self.__split_into_heights()
-
-        for row in heights:
-            for i, height in enumerate(row):
-                if i + 1 > len(row) - 1:
-                    if diff >= 4:
-                        return True
-                    diff = 1
-                else:
-                    next = row[i + 1]
-
-                    if not next["taken"]:
-                        if diff >= 4:
-                            return True
-                        diff = 1
-                    elif next["color"] == height["color"]:
-                        diff += 1
-                        if diff >= 4:
-                            return True
-            else:
-                if diff >= 4:
-                    return True
-                diff = 1
-
-        return False
-    
-    def __find_diagonal_match(self):
-        heights = self.__split_into_heights()
-
-        for r, row in enumerate(heights):
-            for c, height in enumerate(row):
-                current_cell = height
-                current_x = c
-                current_y = r
-                diff = 1
-                
-                while True:
-                    if current_y + 1 >= len(heights) or current_x + 1 >= len(row):
-                        if diff >= 4:
-                            return True
-                        break
-                    else:
-                        next_cell = heights[current_y + 1][current_x + 1]
-                        
-                        if not next_cell["taken"]:
-                            if diff >= 4:
-                                return True
-                            break
-                        elif current_cell["color"] == next_cell["color"]:
-                            diff += 1
-                            if diff >= 4:
-                                return True
-                    current_x += 1
-                    current_y += 1
-                current_cell = height
-                current_x = c
-                current_y = r
-                diff = 1
-                
-                while True:
-                    if current_y + 1 >= len(heights) or current_x - 1 <= len(row):
-                        if diff >= 4:
-                            return True
-                        break
-                    else:
-                        next_cell = heights[current_y + 1][current_x - 1]
-                        
-                        if not next_cell["taken"]:
-                            if diff >= 4:
-                                return True
-                            break
-                        elif current_cell["color"] == next_cell["color"]:
-                            diff += 1
-                            if diff >= 4:
-                                return True
-                    current_x -= 1
-                    current_y += 1
-                
-    def __split_into_heights(self):
-        heights = []
-
-        for row in self.rows:
-            for cell in row:
-                h = cell["height"]
-
-                if h >= len(heights):
-                    heights.append([cell])
-                else:
-                    heights[h - 1].append(cell)
-        
-        return heights
     
