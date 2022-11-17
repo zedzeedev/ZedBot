@@ -135,16 +135,32 @@ class Board:
     def __check_for_horizontal(self):
         zipped = list(zip(*self.rows))
 
-        for row in zipped:
-            diff = 1
+        for r, row in enumerate(zipped):
             for i, cell in enumerate(row):
-                if not i + 1 >= len(row) - 1:
-                    next = row[i + 1]
+                diff = 1
+                current_x = i
+                current_cell = cell
+                color = cell['color']
 
-                    if next['taken'] and next['color'] == cell['color']:
-                        diff += 1
-                if diff >= 4:
-                    return True
+                while True:
+                    if current_x + 1 >= len(row):
+                        if diff >= 4:
+                            return True
+                        break
+                    else:
+                        next_cell = zipped[r][current_x + 1]
+
+                        if not next_cell["taken"]:
+                            if diff >= 4:
+                                return True
+                            break
+                        elif next_cell["color"] == current_cell['color'] and next_cell['color'] == color:
+                            diff += 1
+                            if diff >= 4:
+                                return True
+                    current_x += 1
+                    current_cell = next_cell
+
         
         return False
 
