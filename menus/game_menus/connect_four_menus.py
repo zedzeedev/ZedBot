@@ -1,6 +1,7 @@
 import discord
 import random
 import string
+from menus.game_menus.board import Board, Cell
 
 
 class StartMenu(discord.ui.View):
@@ -38,203 +39,6 @@ class StartMenu(discord.ui.View):
         return plr == self.yellow_player["plr"]
 
 
-class Cell(dict):
-    def __init__(self, color, taken):
-        self['color'] = color
-        self['taken'] = taken
-    
-    def __repr__(self) -> str:
-        return self['color']
-
-
-class Row:
-    def __init__(self, *items):
-        self.items = []
-        for item in items:
-            self.items.append(item)
-
-    def __getitem__(self, key):
-        return self.items[key]
-    
-    def __setitem__(self, key, value):
-        self.items[key] = value
-    
-    def __repr__(self) -> str:
-        s = ""
-        for cell in self.items:
-            s += str(cell)
-        
-        return s
-    
-    def __len__(self):
-        return len(self.items)
-    
-    def append(self, item):
-        self.items.append(item)
-
-
-class Board:
-    def __init__(self, x, y):
-        self.width = x
-        self.height = y
-        self.rows = []
-        self.winner = False
-        for r in range(x):
-            row = Row()
-            for c in range(y):
-                row.append(Cell(color='⬛', taken=False))
-            self.rows.append(row)
-    
-    def __getitem__(self, key):
-        return self.rows[key]
-    
-    def __repr__(self) -> str:
-        s = ""
-
-        zipped = list(zip(*self.rows))
-        for i in range(len(zipped) - 1, -1, - 1):
-            for element in zipped[i]:
-                s += str(element)
-            s += '\n'
-
-        return s
-    
-    def get_lowest_point(self, row):
-        for i, cell in enumerate(row):
-            if not cell['taken']:
-                return i
-        return self.height
-
-    def change_cell(self, row, index, color):
-        if index != self.height:
-            row[index]['color'] = color
-            row[index]['taken'] = True
-        else:
-            print("This column is full!")
-        if self.__check_for_match():
-            self.winner = True
-
-    def __check_for_match(self):
-        if self.__check_for_vertical() or self.__check_for_horizontal() or self.__check_for_diagonal():
-            return True
-
-    def __check_for_vertical(self):
-        for r, row in enumerate(self.rows):
-            for i, cell in enumerate(row):
-                diff = 1
-                current_y = i
-                current_cell = cell
-                color = cell['color']
-                while True:
-                    if current_y + 1 >= len(row):
-                        if diff >= 4:
-                            return True
-                        break
-                    else:
-                        next_cell = self.rows[r][current_y + 1]
-
-                        if not next_cell["taken"]:
-                            if diff >= 4:
-                                return True
-                            break
-                        elif next_cell["color"] == current_cell['color'] and next_cell['color'] == color:
-                            diff += 1
-                            if diff >= 4:
-                                return True
-                    current_y += 1
-                    current_cell = next_cell
-
-                
-            return False
-    
-    def __check_for_horizontal(self):
-        zipped = list(zip(*self.rows))
-
-        for r, row in enumerate(zipped):
-            for i, cell in enumerate(row):
-                diff = 1
-                current_x = i
-                current_cell = cell
-                color = cell['color']
-
-                while True:
-                    if current_x + 1 >= len(row):
-                        if diff >= 4:
-                            return True
-                        break
-                    else:
-                        next_cell = zipped[r][current_x + 1]
-
-                        if not next_cell["taken"]:
-                            if diff >= 4:
-                                return True
-                            break
-                        elif next_cell["color"] == current_cell['color'] and next_cell['color'] == color:
-                            diff += 1
-                            if diff >= 4:
-                                return True
-                    current_x += 1
-                    current_cell = next_cell
-
-        
-        return False
-
-    def __check_for_diagonal(self):
-        for r, row in enumerate(self.rows):
-            for i, cell in enumerate(row):
-                diff = 1
-                current_x = i
-                current_y = r
-                current_cell = cell
-
-                while True:
-                    if current_x + 1 >= len(row) or current_y + 1 >= len(self.rows):
-                        if diff >= 4:
-                            return True
-                        break
-                    else:
-                        next_cell = self.rows[current_y + 1][current_x + 1]
-
-                        if not next_cell["taken"]:
-                            if diff >= 4:
-                                return True
-                            break
-                        elif next_cell["color"] == current_cell["color"]:
-                            diff += 1
-                            if diff >= 4:
-                                return True
-                    current_x += 1
-                    current_y += 1
-                    current_cell = next_cell
-
-                diff = 1
-                current_x = i
-                current_y = r
-                current_cell = cell
-
-                while True:
-                    if current_x - 1 >= len(row) or current_y + 1 >= len(self.rows):
-                        if diff >= 4:
-                            return True
-                        break
-                    else:
-                        next_cell = self.rows[current_y + 1][current_x - 1]
-
-                        if not next_cell["taken"]:
-                            if diff >= 4:
-                                return True
-                            break
-                        elif next_cell["color"] == current_cell["color"]:
-                            diff += 1
-                            if diff >= 4:
-                                return True
-                    current_x -= 1
-                    current_y += 1
-                    current_cell = next_cell      
-
-        return False
-
-
 class ConnectFourGame(discord.ui.View):
     def __init__(self, red_player, yellow_player):
         super().__init__()
@@ -244,7 +48,7 @@ class ConnectFourGame(discord.ui.View):
         self.current_player = red_player
         self.row_buttons = []
         self.winner = None
-        self.board = Board(7, 6)
+        self.board = Board(x=7, y=6, num_to_match=4)
 
         
         for row in range(1, 8):
@@ -257,7 +61,7 @@ class ConnectFourGame(discord.ui.View):
             self.add_item(button)
     
     def create_embed(self):
-        embed = discord.Embed(title="Connect Four", description=str(self.board))
+        embed = discord.Embed(title="Connect Four", description=self.board.reverse_str())
         embed.set_footer(text=f"It is {self.current_player['plr']}'s turn.")
         if self.winner != None:
             embed.remove_footer()
@@ -265,20 +69,19 @@ class ConnectFourGame(discord.ui.View):
         return embed
 
     async def button_callback_event(self, interaction: discord.Interaction):
-        current = self.__find_index_from_id(interaction.data["custom_id"])
+        row = self.__find_index_from_id(interaction.data["custom_id"])
         
         if self.winner == None:
-            await interaction.response.send_message(current + 1, ephemeral=True)
+            await interaction.response.send_message(row + 1, ephemeral=True)
             followup = interaction.followup
 
             if interaction.user == self.current_player["plr"]:
-                row = self.board[current]
+                lowest_point = self.board.find_lowest_point(row=row)
                 
-                c = self.board.get_lowest_point(row=row)
-                if c == 6:
+                if lowest_point == 6:
                     await followup.send("This column is full!", ephemeral=True)
                 else:
-                    self.board.change_cell(row=row, index=c, color=self.current_player["color"])
+                    self.board[row, lowest_point] = Cell(self.current_player['color'], True)
                     if self.board.winner:
                         self.winner = self.current_player
                         await interaction.message.edit(embed=self.create_embed())
