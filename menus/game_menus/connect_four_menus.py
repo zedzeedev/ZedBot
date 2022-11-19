@@ -67,13 +67,13 @@ class ConnectFourGame(TwoPlayerMenu):
         
         if self.winner == None:
             await interaction.response.send_message(row + 1, ephemeral=True)
-            followup = interaction.followup
+            follow_up = interaction.followup
 
             if interaction.user == self.current_player["plr"]:
                 lowest_point = self.board.find_lowest_point(row=row)
                 
-                if lowest_point == 6:
-                    await followup.send("This column is full!", ephemeral=True)
+                if lowest_point == self.board.height:
+                    await follow_up.send("This column is full!", ephemeral=True)
                 else:
                     self.board[row, lowest_point] = Cell(self.current_player['color'], True)
                     if self.board.winner:
@@ -83,9 +83,9 @@ class ConnectFourGame(TwoPlayerMenu):
                     self.current_player, self.other_player = self.other_player, self.current_player
                     await interaction.message.edit(embed=self.create_embed())
             elif interaction.user == self.other_player["plr"]:
-                await followup.send("It is not your turn yet!", ephemeral=True)
+                await follow_up.send("It is not your turn yet!", ephemeral=True)
             else:
-                await followup.send("You are not a part of this game!", ephemeral=True)
+                await follow_up.send("You are not a part of this game!", ephemeral=True)
                 
             
         else:
