@@ -1,7 +1,8 @@
 import discord
 import random
 import string
-from menus.game_menus.board import Board, Cell
+from menus.game_menus.helpers.board import Board, Cell
+from menus.game_menus.helpers.game_menus import TwoPlayerMenu
 
 
 class StartMenu(discord.ui.View):
@@ -39,24 +40,17 @@ class StartMenu(discord.ui.View):
         return plr == self.yellow_player["plr"]
 
 
-class ConnectFourGame(discord.ui.View):
-    def __init__(self, red_player, yellow_player):
-        super().__init__()
-        self.red_player = red_player
-        self.yellow_player = yellow_player
-        self.other_player = yellow_player
-        self.current_player = red_player
-        self.row_buttons = []
-        self.winner = None
+class ConnectFourGame(TwoPlayerMenu):
+    def __init__(self, player1, player2):
+        super().__init__(player1=player1, player2=player2)
         self.board = Board(x=7, y=6, num_to_match=4)
 
-        
         for row in range(1, 8):
-            self.row_buttons.append(discord.ui.Button(
+            self.buttons.append(discord.ui.Button(
                 label=row, style=discord.ButtonStyle.gray, 
                 custom_id=''.join(random.choices(string.ascii_letters + string.digits, k=20))))
         
-        for button in self.row_buttons:
+        for button in self.buttons:
             button.callback = self.button_callback_event
             self.add_item(button)
     
@@ -69,7 +63,7 @@ class ConnectFourGame(discord.ui.View):
         return embed
 
     async def button_callback_event(self, interaction: discord.Interaction):
-        row = self.__find_index_from_id(interaction.data["custom_id"])
+        row = self.find_index_from_id(interaction.data["custom_id"])
         
         if self.winner == None:
             await interaction.response.send_message(row + 1, ephemeral=True)
@@ -96,10 +90,4 @@ class ConnectFourGame(discord.ui.View):
             
         else:
             await interaction.response.send_message(f"{self.winner['plr']} already won!", ephemeral=True)
-
-    def __find_index_from_id(self, id):
-        for i, button in enumerate(self.row_buttons):
-            if button.custom_id == id:
-                return i
-        return 0
     
