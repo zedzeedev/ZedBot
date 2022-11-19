@@ -54,6 +54,5 @@ class GomokuGame(TwoPlayerMenu):
     
     def button_callback_event(self, interaction: discord.Interaction):
         pass
-    
-    def         
+     
         
