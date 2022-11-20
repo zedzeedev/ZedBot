@@ -22,6 +22,7 @@ class StartMenu(discord.ui.View):
         if self.__is_second_player(interaction.user) and not self.match_accepted:
             self.match_accepted = True
             game_menu = GomokuGame(self.red_player, self.yellow_player)
+            
             await interaction.response.send_message(embed=game_menu.create_embed(), view=game_menu)
         elif self.match_accepted:
             await interaction.response.send_message(f"This match has already started!")
@@ -48,39 +49,52 @@ class GomokuGame(TwoPlayerMenu):
             self.buttons.append(discord.ui.Button(
                 label=row, style=discord.ButtonStyle.gray, 
                 custom_id=''.join(random.choices(ascii_letters + digits, k=20))))
+        self.turns = 0
+        self.current_row = 0
+        self.current_col = 0
         
         for button in self.buttons:
             button.callback = self.button_callback_event
             self.add_item(button)
         
     def create_embed(self):
-        embed = discord.Embed(title="Gomoku", description=str(self.board))
+        embed = discord.Embed(title="Gomoku", description=self.board.reverse_str())
         embed.set_footer(text=f"It is {self.current_player['plr']}'s turn.")
+        
         if self.winner != None:
             embed.remove_footer()
             embed.add_field(name="Winner!", value=f"{self.winner['plr']} {self.winner['color']} has won the game of Connect Four!")
         return embed
     
     async def button_callback_event(self, interaction: discord.Interaction):
-        row = self.find_index_from_id(interaction.data["custom_id"])
+        current = self.find_index_from_id(interaction.data["custom_id"])
         
         if self.winner == None:
-            await interaction.response.send_message(row + 1, ephemeral=True)
+            await interaction.response.send_message(current + 1, ephemeral=True)
             follow_up = interaction.followup
             
             if interaction.user == self.current_player["plr"]:
-                lowest_point = self.board.find_lowest_point(row=row)
-                
-                if lowest_point == self.board.height:
-                    await follow_up.send("This column is full!", ephemeral=True)
+                self.turns += 1
+                if self.turns == 1:
+                    self.current_row = current
                 else:
-                    self.board[row, lowest_point] = Cell(self.current_player['color'], True)
-                    if self.board.winner:
-                        self.winner = self.current_player
-                        await interaction.message.edit(embed=self.create_embed())
+                    self.current_col = current
+            
+                if self.turns > 2:
+                    if self.board[self.current_row, self.current_col]["taken"]:
+                        self.turns = 0
+                    else:
+                        self.board[self.current_row, self.current_col] = Cell(self.current_player["color"], True)
+                        self.current_col = 0
+                        self.current_row = 0
+                        
+                        if self.board.winner:
+                            self.winner = self.current_player
+                            await interaction.message.edit(embed=self.create_embed())
+                        self.current_player, self.other_player = self.other_player, self.current_player
 
-                    self.current_player, self.other_player = self.other_player, self.current_player
-                    await interaction.message.edit(embed=self.create_embed())
+                    
+                await interaction.message.edit(embed=self.create_embed())
             elif interaction.user == self.other_player["plr"]:
                 await follow_up.send("It is not your turn yet!", ephemeral=True)
             else:
