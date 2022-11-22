@@ -1,7 +1,8 @@
 import discord
+from abc import ABC, abstractmethod
 
 
-class TwoPlayerMenu(discord.ui.View):
+class TwoPlayerMenu(discord.ui.View, ABC):
     def __init__(self, player1, player2):
         super().__init__()
         self.player1 = player1
@@ -11,9 +12,12 @@ class TwoPlayerMenu(discord.ui.View):
         self.winner = None
         self.buttons = []
         
-    
     def find_index_from_id(self, id):
         for i, button in enumerate(self.buttons):
             if button.custom_id == id:
                 return i
         return 0
+    
+    @abstractmethod
+    async def button_callback_event(self, interaction: discord.Interaction):
+        pass
