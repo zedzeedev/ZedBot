@@ -10,7 +10,7 @@ class TicTacToe(commands.Cog):
     
     @discord.slash_command(name="tictactoe-play", description="Starts a game of Tic-Tac-Toe")
     async def tic_tac_toe_play(self, ctx, user: discord.User):
-        start_menu = StartMenu({"plr": ctx.author, "symbol": "❌"}, {"plr": user, "symbol": "⭕"})
+        start_menu = StartMenu({"plr": ctx.author, "color": "❌"}, {"plr": user, "color": "⭕"})
         
         embed = start_menu.create_embed()
         await ctx.respond("Sending message...", ephemeral=True)

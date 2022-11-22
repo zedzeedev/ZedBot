@@ -28,6 +28,7 @@ cogs_list = [
     "math",
     "poll",
     "games.connect_four",
+    "games.tic_tac_toe"
 ]
 
 
