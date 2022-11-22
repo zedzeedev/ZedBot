@@ -28,7 +28,6 @@ cogs_list = [
     "math",
     "poll",
     "games.connect_four",
-    # "games.gomoku"
 ]
 
 
