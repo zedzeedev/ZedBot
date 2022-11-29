@@ -18,6 +18,5 @@ class TwoPlayerMenu(discord.ui.View, ABC):
                 return i
         return 0
     
-    @abstractmethod
     async def button_callback_event(self, interaction: discord.Interaction):
         pass

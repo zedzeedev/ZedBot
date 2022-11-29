@@ -1,11 +1,58 @@
-class Card(dict):
-    def __init__(self, suite, number, color):
-        self.suite = suite
+import random
+
+
+class Card:
+    def __init__(self):
+        self.number = None
+        self.suite = None
+        self.color = None
+    
+    def __repr__(self) -> str:
+        return f"Number: {self.number}, Suite: {self.suite}, Color: {self.color}"
+    
+    def add_number(self, number):
         self.number = number
+        return self
+    
+    def add_suite(self, suite):
+        self.suite = suite
+        return self
+    
+    def add_color(self, color):
         self.color = color
+        return self
     
-    def __getitem__(self, key):
-        return self[key]
+
+suites = ["spades", "hearts", "diamonds", "clubs"]
+colors = ["red", "black"]
+
+
+def random_card() -> Card:
+    return Card().add_number(random.randint(1, 13)).add_suite(''.join(random.choice(suites))).add_color(''.join(random.choice(suites)))
+
+
+def deal_cards(amount_per, deck_amount):
+    decks = []
     
-    def __setitem__(self, key, value):
-        self[key] = value
+    for i in range(deck_amount):
+        deck = {"cards": []}
+        
+        for n in range(amount_per):
+            deck["cards"].append(random_card())
+        decks.append(deck)
+    
+    return decks
+
+
+def deal_deck(amount):
+    deck = {"cards": []}
+    
+    for n in range(amount):
+        deck["cards"].append(random_card())
+    
+    return deck
+
+
+def add_card(deck, card: Card):
+    print(card)
+    deck["cards"].append(card)
