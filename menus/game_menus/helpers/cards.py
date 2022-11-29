@@ -52,4 +52,4 @@ def deal_cards(amount_per, deck_amount):
 
 def add_card(deck, card: Card):
     print(card)
-    deck["cards"].append(card)
+    deck.append(card)
