@@ -32,10 +32,10 @@ def random_card() -> Card:
 
 
 def deal_deck(amount):
-    deck = {"cards": []}
+    deck = []
     
     for n in range(amount):
-        deck["cards"].append(random_card())
+        deck.append(random_card())
     
     return deck
 
