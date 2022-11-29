@@ -37,22 +37,19 @@ class StartMenu(discord.ui.View):
     def __is_second_player(self, plr: discord.User):
         return plr == self.player2["plr"]
     
-
-# Used to modify cards
-def change_values(decks):
-    for deck in decks:
-        for i, val, in enumerate(deck["cards"]):
-            if val.number == 1:
-                deck["cards"][i] = Card().add_number(11).add_suite(val.suite).add_color(val.color)
-            elif val.number > 10:
-                deck["cards"][i] = Card().add_number(10).add_suite(val.suite).add_color(val.color)
-
-
+    
 def change_value(card):
     if card.number == 1:
         card.number = 11
     elif card.number > 10:
         card.number = 10
+
+
+# Used to modify cards for blackjack
+def change_values(decks):
+    for deck in decks:
+        for i, val, in enumerate(deck["cards"]):
+            deck["cards"][i] = change_value(val)
 
 
 class BlackJackGame(TwoPlayerMenu):
