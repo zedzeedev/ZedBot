@@ -29,7 +29,7 @@ cogs_list = [
     "poll",
     "games.connect_four",
     "games.tic_tac_toe",
-    # "games.blackjack"
+    "games.blackjack"
 ]
 
 

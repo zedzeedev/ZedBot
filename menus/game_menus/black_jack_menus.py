@@ -11,7 +11,7 @@ class StartMenu(discord.ui.View):
         self.match_accepted = False
     
     def create_embed(self):
-        embed = discord.Embed(title="Connect Four", description=f"{self.x_player['plr']} would like to play Tic-Tac-Toe with {self.o_player['plr']}")
+        embed = discord.Embed(title="BlackJack", description=f"{self.player1} would like to play BlackJack with {self.player2}")
 
         return embed
     
@@ -30,12 +30,12 @@ class StartMenu(discord.ui.View):
     async def decline_button_callback(self, button, interaction: discord.Interaction):
         if self.__is_second_player(interaction.user):
             self.match_accepted = False
-            await interaction.response.send_message(f"{self.player2['plr']} has declined your TicTacToe request!")
+            await interaction.response.send_message(f"{self.player2} has declined your TicTacToe request!")
         else:
             await interaction.response.send_message(f"You are not the requested user!")
             
     def __is_second_player(self, plr: discord.User):
-        return plr == self.player2["plr"]
+        return plr == self.player2
     
     
 def change_value(card):
@@ -43,28 +43,38 @@ def change_value(card):
         card.number = 11
     elif card.number > 10:
         card.number = 10
-
+    return card
 
 # Used to modify cards for blackjack
 def change_values(decks):
     for deck in decks:
-        for i, val, in enumerate(deck["cards"]):
+        for i, val, in enumerate(deck):
             deck[i] = change_value(val)
 
 
 class BlackJackGame(TwoPlayerMenu):
     def __init__(self, player1, player2):
-        super().__init__(player1, player2)
-        self.player1 = {"plr": player1, "deck": deal_deck(2), "stay": False}
-        self.player2 = {"plr": player2, "deck": deal_deck(2), "stay": False}
+        super().__init__({"plr": player1, "deck": deal_deck(2), "stay": False}, {"plr": player2, "deck": deal_deck(2), "stay": False})
         
-        if sum_of_deck(player1) == 21:
-            self.winner = player1
-        if sum_of_deck(player2) == 21:
-            self.winner = player2
+        if sum_of_deck(self.player1["deck"]) == 21:
+            self.winner = self.player1
+        if sum_of_deck(self.player2["deck"]) == 21:
+            self.winner = self.player2
+    
+    def create_cards_embed(self, player):
+        descr = ""
+        
+        for card in player["deck"]:
+            descr += str(card)
+        descr += f"Amount: {sum_of_deck(player['deck'])}"
+        return discord.Embed(title="Cards:", description=descr)
     
     def create_embed(self):
-        pass
+        embed = discord.Embed(title="BlackJack")
+        description = f"Player1: {len(self.player1['deck'])}\nPlayer2: {len(self.player2['deck'])}"
+        embed.description = description
+        
+        return embed
     
     @discord.ui.button(label="Hit")
     async def hit_button_callback(self, button, interaction: discord.Interaction):
@@ -72,6 +82,7 @@ class BlackJackGame(TwoPlayerMenu):
             
             if interaction.user == self.current_player["plr"]:
                 add_card(self.current_player["deck"], change_value(random_card()))
+                print(self.current_player["deck"])
                 self.current_player["stay"] = False
                 
                 sum = sum_of_deck(self.current_player["deck"])
@@ -80,10 +91,11 @@ class BlackJackGame(TwoPlayerMenu):
                 elif sum > 21:
                     self.winner = self.other_player
                 self.current_player, self.other_player = self.other_player, self.current_player
+                await interaction.message.edit(embed=self.create_embed())
             else:
                 await interaction.response.send_message("You are not the requested user!", ephemeral=True)
         else:
-            await interaction.response.send_message(f"{self.winner['plr']} has already won the game!")
+            await interaction.response.send_message(f"{self.winner['plr']} has already won the game!", ephemeral=True)
     
     @discord.ui.button(label="Stand")
     async def stand_button_callback(self, button, interaction: discord.Interaction):
@@ -102,5 +114,5 @@ class BlackJackGame(TwoPlayerMenu):
                         self.winner = self.other_player
                         
                 self.current_player, self.other_player = self.other_player, self.current_player
+                await interaction.message.edit(embed=self.create_embed())
            
-                
