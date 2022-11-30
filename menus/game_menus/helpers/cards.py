@@ -53,3 +53,10 @@ def deal_cards(amount_per, deck_amount):
 def add_card(deck, card: Card):
     print(card)
     deck.append(card)
+    
+
+def sum_of_deck(deck):
+    i = 0
+    for card in deck:
+        i += card.number
+    return i

@@ -1,5 +1,5 @@
 import discord
-from menus.game_menus.helpers.cards import Card, deal_cards, add_card, random_card, deal_deck
+from menus.game_menus.helpers.cards import Card, deal_cards, add_card, random_card, deal_deck, sum_of_deck
 from menus.game_menus.helpers.game_menus import TwoPlayerMenu
 
 
@@ -49,19 +49,58 @@ def change_value(card):
 def change_values(decks):
     for deck in decks:
         for i, val, in enumerate(deck["cards"]):
-            deck["cards"][i] = change_value(val)
+            deck[i] = change_value(val)
 
 
 class BlackJackGame(TwoPlayerMenu):
     def __init__(self, player1, player2):
         super().__init__(player1, player2)
-        self.player1 = {"plr": player1, "deck": deal_deck(2)}
-        self.player2 = {"plr": player2, "deck": deal_deck(2)}
+        self.player1 = {"plr": player1, "deck": deal_deck(2), "stay": False}
+        self.player2 = {"plr": player2, "deck": deal_deck(2), "stay": False}
         
+        if sum_of_deck(player1) == 21:
+            self.winner = player1
+        if sum_of_deck(player2) == 21:
+            self.winner = player2
+    
+    def create_embed(self):
+        pass
+    
     @discord.ui.button(label="Hit")
     async def hit_button_callback(self, button, interaction: discord.Interaction):
-        pass
+        if self.winner == None:
+            
+            if interaction.user == self.current_player["plr"]:
+                add_card(self.current_player["deck"], change_value(random_card()))
+                self.current_player["stay"] = False
+                
+                sum = sum_of_deck(self.current_player["deck"])
+                if sum == 21:
+                    self.winner = self.current_player
+                elif sum > 21:
+                    self.winner = self.other_player
+                self.current_player, self.other_player = self.other_player, self.current_player
+            else:
+                await interaction.response.send_message("You are not the requested user!", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"{self.winner['plr']} has already won the game!")
     
     @discord.ui.button(label="Stand")
     async def stand_button_callback(self, button, interaction: discord.Interaction):
-        pass
+        if self.winner == None:
+            
+            if interaction.user == self.current_player["plr"]:
+                self.current_player["stay"] == True
+                
+                if self.other_player["stay"]:
+                    sum = sum_of_deck(self.current_player["deck"])
+                    sum_plr2 = sum_of_deck(self.other_player["deck"])
+                    
+                    if sum > sum_plr2:
+                        self.winner = self.current_player
+                    else:
+                        self.winner = self.other_player
+                        
+                self.current_player, self.other_player = self.other_player, self.current_player
+           
+                
