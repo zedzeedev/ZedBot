@@ -10,8 +10,8 @@ class BlackJack(commands.Cog):
     
     @discord.slash_command(name="blackjack-play", description="Starts a game of Black Jack")
     async def black_jack_play(self, ctx, user: discord.User):
-        start_menu = StartMenu(player1=ctx.author, player2=user)
-        
+        start_menu = StartMenu(player1=ctx.author, player2=user, ctx=ctx)
+
         embed = start_menu.create_embed()
         await ctx.respond("Sending message...", ephemeral=True)
         await ctx.send(embed=embed, view=start_menu)
