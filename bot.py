@@ -26,8 +26,10 @@ async def talk(ctx, msg: str):
 
 cogs_list = [
     "math",
+    "poll",
     "games.connect_four",
-    "poll"
+    "games.tic_tac_toe",
+    # "games.blackjack"
 ]
 
 

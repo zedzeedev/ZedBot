@@ -5,6 +5,7 @@ from menus.game_menus.connect_four_menus import StartMenu
 
 class ConnectFour(commands.Cog):
     def __init__(self, bot):
+        super().__init__()
         self.bot = bot
         
     @discord.slash_command(name="connect4-play", description="Starts a game of connect4")

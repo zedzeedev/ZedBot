@@ -1,18 +1,17 @@
 import discord
-from menus.game_menus.helpers.board import Board, Cell
-from string import ascii_letters, digits
+from menus.game_menus.helpers.cards import Card, deal_cards, add_card, random_card, deal_deck
 from menus.game_menus.helpers.game_menus import TwoPlayerMenu
 
 
 class StartMenu(discord.ui.View):
     def __init__(self, player1: discord.User, player2: discord.User):
         super().__init__()
-        self.red_player = player1
-        self.yellow_player = player2
+        self.player1 = player1
+        self.player2 = player2
         self.match_accepted = False
     
     def create_embed(self):
-        embed = discord.Embed(title="Connect Four", description=f"{self.red_player['plr']} would like to play Gomoku with {self.yellow_player['plr']}")
+        embed = discord.Embed(title="Connect Four", description=f"{self.x_player['plr']} would like to play Tic-Tac-Toe with {self.o_player['plr']}")
 
         return embed
     
@@ -20,7 +19,7 @@ class StartMenu(discord.ui.View):
     async def accept_button_callback(self, button, interaction: discord.Interaction):
         if self.__is_second_player(interaction.user) and not self.match_accepted:
             self.match_accepted = True
-            game_menu = GomokuGame(self.red_player, self.yellow_player)
+            game_menu = BlackJackGame(self.player1, self.player2)
             await interaction.response.send_message(embed=game_menu.create_embed(), view=game_menu)
         elif self.match_accepted:
             await interaction.response.send_message(f"This match has already started!")
@@ -31,28 +30,38 @@ class StartMenu(discord.ui.View):
     async def decline_button_callback(self, button, interaction: discord.Interaction):
         if self.__is_second_player(interaction.user):
             self.match_accepted = False
-            await interaction.response.send_message(f"{self.yellow_player['plr']} has declined your Gomoku request!")
+            await interaction.response.send_message(f"{self.player2['plr']} has declined your TicTacToe request!")
         else:
             await interaction.response.send_message(f"You are not the requested user!")
             
     def __is_second_player(self, plr: discord.User):
-        return plr == self.yellow_player["plr"]
+        return plr == self.player2["plr"]
     
+    
+def change_value(card):
+    if card.number == 1:
+        card.number = 11
+    elif card.number > 10:
+        card.number = 10
 
-class GomokuGame(TwoPlayerMenu):
+
+# Used to modify cards for blackjack
+def change_values(decks):
+    for deck in decks:
+        for i, val, in enumerate(deck["cards"]):
+            deck["cards"][i] = change_value(val)
+
+
+class BlackJackGame(TwoPlayerMenu):
     def __init__(self, player1, player2):
-        super().__init__(player1=player1, player2=player2)
-        self.board = Board(x=15, y=15, num_to_match=5)
+        super().__init__(player1, player2)
+        self.player1 = {"plr": player1, "deck": deal_deck(2)}
+        self.player2 = {"plr": player2, "deck": deal_deck(2)}
         
-    def create_embed(self):
-        embed = discord.Embed(title="Gomoku", description=str(self.board))
-        embed.set_footer(text=f"It is {self.current_player['plr']}'s turn.")
-        if self.winner != None:
-            embed.remove_footer()
-            embed.add_field(name="Winner!", value=f"{self.winner['plr']} {self.winner['color']} has won the game of Connect Four!")
-        return embed
-    
-    def button_callback_event(self, interaction: discord.Interaction):
+    @discord.ui.button(label="Hit")
+    async def hit_button_callback(self, button, interaction: discord.Interaction):
         pass
-     
-        
+    
+    @discord.ui.button(label="Stand")
+    async def stand_button_callback(self, button, interaction: discord.Interaction):
+        pass
