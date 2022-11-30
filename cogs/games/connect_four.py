@@ -18,3 +18,4 @@ class ConnectFour(commands.Cog):
 
 def setup(bot):
     bot.add_cog(ConnectFour(bot=bot))
+    
