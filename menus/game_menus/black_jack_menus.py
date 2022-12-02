@@ -77,7 +77,31 @@ class BlackJackGame(TwoPlayerMenu):
     
     def create_embed(self):
         embed = discord.Embed(title="BlackJack", description="")
-    
+        desc = ""
+        
+        for item in self.player1["deck"]:
+            desc += "🟥"
+        sum = sum_of_deck(self.current_player["deck"])
+        
+        if sum > 21:
+            desc += "Bust!"
+        else:
+            desc += f"\nStanding: {self.player1['stay']}"
+        
+        embed.add_field(name=f"{self.player1['plr']}", value=desc)
+        desc = ""
+        
+        for item in self.player2["deck"]:
+            desc += "⬜"
+        sum = sum_of_deck(self.current_player["deck"])
+        
+        if sum > 21:
+            desc += "Bust!"
+        else:
+            desc += f"\nStanding: {self.player2['stay']}"
+        
+        embed.add_field(name=f"{self.player2['plr']}", value=desc)
+        
         embed.set_footer(text=f"It is {self.current_player['plr']}'s turn.")
         if self.winner != None:
             embed.remove_footer()
@@ -111,7 +135,7 @@ class BlackJackGame(TwoPlayerMenu):
         if self.winner == None:
             
             if interaction.user == self.current_player["plr"]:
-                self.current_player["stay"] == True
+                self.current_player["stay"] = True
                 
                 if self.other_player["stay"]:
                     sum = sum_of_deck(self.current_player["deck"])
@@ -122,7 +146,7 @@ class BlackJackGame(TwoPlayerMenu):
                     else:
                         self.winner = self.other_player
                 
-                await interaction.response.send_message(embed=create_cards_embed(self.current_player))
+                await interaction.response.send_message(embed=create_cards_embed(self.current_player), ephemeral=True)
                         
                 self.current_player, self.other_player = self.other_player, self.current_player
                 await interaction.message.edit(embed=self.create_embed())
