@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from math import sqrt
 
+
 class Math(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
