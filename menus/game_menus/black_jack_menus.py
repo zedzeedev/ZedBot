@@ -44,9 +44,12 @@ class StartMenu(discord.ui.View):
     async def accept_button_callback(self, button, interaction: discord.Interaction):
         if self.__is_second_player(interaction.user) and not self.match_accepted:
             self.match_accepted = True
+            
             game_menu = BlackJackGame(self.player1, self.player2)
+            
             await interaction.response.send_message(embed=game_menu.create_embed(), view=game_menu)
             follow_up = interaction.followup
+            
             await follow_up.send(embed=create_cards_embed(self.player2), ephemeral=True)
             await self.ctx.send(embed=create_cards_embed(self.player1), ephemeral=True)
         elif self.match_accepted:
