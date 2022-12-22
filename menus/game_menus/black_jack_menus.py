@@ -52,6 +52,7 @@ class StartMenu(discord.ui.View):
             
             await follow_up.send(embed=create_cards_embed(self.player2), ephemeral=True)
             await self.ctx.send(embed=create_cards_embed(self.player1), ephemeral=True)
+            
         elif self.match_accepted:
             await interaction.response.send_message(f"This match has already started!")
         else:
@@ -82,30 +83,41 @@ class BlackJackGame(TwoPlayerMenu):
         embed = discord.Embed(title="BlackJack", description="")
         desc = ""
         
-        for item in self.player1["deck"]:
-            desc += "🟥"
-        sum = sum_of_deck(self.current_player["deck"])
+        # Add a emoji for each one of the first players cards
         
-        if sum > 21:
-            desc += "Bust!"
+        for _ in self.player1["deck"]:
+            desc += "🟥"
+        
+        # Check if there was a bust
+            
+        deck_sum = sum_of_deck(self.player1["deck"])
+        
+        if deck_sum > 21:
+            desc += "\nBust!"
         else:
             desc += f"\nStanding: {self.player1['stay']}"
         
         embed.add_field(name=f"{self.player1['plr']}", value=desc)
+        
+        
         desc = ""
         
-        for item in self.player2["deck"]:
-            desc += "⬜"
-        sum = sum_of_deck(self.current_player["deck"])
+        # Add an emoji for each one of the second players cards
         
-        if sum > 21:
-            desc += "Bust!"
+        for _ in self.player2["deck"]:
+            desc += "⬜"
+
+        deck_sum = sum_of_deck(self.player2["deck"])
+        
+        if deck_sum > 21:
+            desc += "\nBust!"
         else:
             desc += f"\nStanding: {self.player2['stay']}"
         
         embed.add_field(name=f"{self.player2['plr']}", value=desc)
         
         embed.set_footer(text=f"It is {self.current_player['plr']}'s turn.")
+        
         if self.winner != None:
             embed.remove_footer()
             embed.add_field(name="Winner!", value=f"{self.winner['plr']} has won the game of BlackJack")
