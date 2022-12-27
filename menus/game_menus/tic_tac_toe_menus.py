@@ -63,7 +63,7 @@ class TicTacToeGame(TwoPlayerMenu):
         embed.set_footer(text=f"It is {self.current_player['plr']}'s turn.")
         if self.winner != None:
             embed.remove_footer()
-            embed.add_field(name="Winner!", value=f"{self.winner['plr']} {self.winner['color']} has won the game of Connect Four!")
+            embed.add_field(name="Winner!", value=f"{self.winner['plr']} {self.winner['color']} has won the game of Tic-Tac-Toe!")
         return embed
     
     
