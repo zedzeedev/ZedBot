@@ -133,7 +133,7 @@ class Board:
                 diff = 1
                 
                 for i in range(self.num_to_match):
-                    if current_x - 1 >= self.width and current_y + 1 <= self.height:
+                    if current_x - 1 >= 0 and current_y + 1 <= self.height:
                         next_cell = self.board[current_x - 1, current_y + 1]
                         
                         if next_cell['taken'] and next_cell['color'] == current_cell['color']:
