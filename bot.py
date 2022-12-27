@@ -1,30 +1,16 @@
 import discord
+from discord.ext import commands
 import json
+import os
 
+with open("config.json", "r") as config:
+    data = json.load(config)
+    token = data["token"]
+    prefix = data["prefix"]
 
-bot = discord.Bot()
+bot = commands.Bot(command_prefix=prefix, intents=discord.Intents.default())
 
-with open("config.json") as conf:
-    config = json.load(fp=conf)
-
-
-@bot.event
-async def on_ready():
-    pass
-
-
-@bot.event
-async def on_message(message):
-    pass
-
-
-@bot.command(description="Forces the bot to send the given message.")
-async def talk(ctx, msg: str):
-    await ctx.respond("Message sending...", ephemeral=True)
-    await ctx.send(msg)
-
-
-cogs_list = [
+cogs = [
     "math",
     "poll",
     "games.connect_four",
@@ -33,7 +19,18 @@ cogs_list = [
 ]
 
 
-for cog in cogs_list:
-    bot.load_extension(f"cogs.{cog}")
+@bot.event
+async def setup_hook():
+    # Load cogs
+    
+    for cog in cogs:
+        await bot.load_extension("cogs." + cog)
+    await bot.tree.sync()
 
-bot.run(config["token"])
+
+@bot.event
+async def on_ready():
+    print(f"We have logged in as {bot.user}")
+
+
+bot.run("OTkwNDA4MzUzMTc4MDkxNTMw.GqYfNi.HSwML-2FDYLvIg-pqgZtpuDBW6B1qZgtbNEzZ8")

@@ -19,7 +19,7 @@ class StartMenu(discord.ui.View):
         return embed
     
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
-    async def accept_button_callback(self, button, interaction: discord.Interaction):
+    async def accept_button_callback(self, interaction: discord.Interaction, button: discord.Button):
         if self.__is_second_player(interaction.user) and not self.match_accepted:
             self.match_accepted = True
             game_menu = TicTacToeGame(self.x_player, self.o_player)
@@ -30,7 +30,7 @@ class StartMenu(discord.ui.View):
             await interaction.response.send_message(f"You are not the requested user!", ephemeral=True)
     
     @discord.ui.button(label="Decline", style=discord.ButtonStyle.red)
-    async def decline_button_callback(self, button, interaction: discord.Interaction):
+    async def decline_button_callback(self, interaction: discord.Interaction, button: discord.Button):
         if self.__is_second_player(interaction.user):
             self.match_accepted = False
             await interaction.response.send_message(f"{self.o_player['plr']} has declined your TicTacToe request!")
