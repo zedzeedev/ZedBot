@@ -14,7 +14,7 @@ class StartMenu(discord.ui.View):
         self.match_accepted = False
     
     def create_embed(self):
-        embed = discord.Embed(title="Connect Four", description=f"{self.x_player['plr']} would like to play Tic-Tac-Toe with {self.o_player['plr']}")
+        embed = discord.Embed(title="Tic-Tac-Toe", description=f"{self.x_player['plr']} would like to play Tic-Tac-Toe with {self.o_player['plr']}")
 
         return embed
     

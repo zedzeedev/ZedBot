@@ -41,7 +41,7 @@ class StartMenu(discord.ui.View):
         return embed
     
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
-    async def accept_button_callback(self, interaction: discord.Button, button: discord.Button):
+    async def accept_button_callback(self, interaction: discord.Interaction, button: discord.Button):
         if self.__is_second_player(interaction.user) and not self.match_accepted:
             self.match_accepted = True
             
@@ -124,7 +124,7 @@ class BlackJackGame(TwoPlayerMenu):
         return embed
     
     @discord.ui.button(label="Hit")
-    async def hit_button_callback(self, button, interaction: discord.Interaction):
+    async def hit_button_callback(self, interaction: discord.Interaction, button: discord.Button):
         if self.winner == None:
             
             if interaction.user == self.current_player["plr"]:                
@@ -146,7 +146,7 @@ class BlackJackGame(TwoPlayerMenu):
             await interaction.response.send_message(f"{self.winner['plr']} has already won the game!", ephemeral=True)
     
     @discord.ui.button(label="Stand")
-    async def stand_button_callback(self, button, interaction: discord.Interaction):
+    async def stand_button_callback(self, interaction: discord.Interaction, button: discord.Button):
         if self.winner == None:
             
             if interaction.user == self.current_player["plr"]:
