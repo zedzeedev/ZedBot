@@ -33,4 +33,4 @@ async def on_ready():
     print(f"We have logged in as {bot.user}")
 
 
-bot.run("OTkwNDA4MzUzMTc4MDkxNTMw.GqYfNi.HSwML-2FDYLvIg-pqgZtpuDBW6B1qZgtbNEzZ8")
+bot.run(token)

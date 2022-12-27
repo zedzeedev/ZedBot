@@ -120,7 +120,6 @@ class Board:
                         
                         if next_cell['taken'] and next_cell['color'] == current_cell['color']:
                             diff += 1
-                            print(diff)
                             if diff >= self.num_to_match:
                                 return True
                     current_cell = next_cell
@@ -139,7 +138,6 @@ class Board:
                         
                         if next_cell['taken'] and next_cell['color'] == current_cell['color']:
                             diff += 1
-                            print(diff)
                             if diff >= self.num_to_match:
                                 return True
                     current_cell = next_cell
