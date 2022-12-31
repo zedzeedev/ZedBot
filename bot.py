@@ -33,5 +33,3 @@ async def on_ready():
 
 
 bot.run(token=token)
-
-# TODO: make the StartMenu modular
