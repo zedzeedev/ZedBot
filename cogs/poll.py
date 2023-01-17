@@ -9,13 +9,11 @@ class Poll(commands.Cog):
         self.bot = bot
     
     @app_commands.command(description="Creates a poll.")
-    
     @app_commands.describe(
         title="The title of the poll",
         description="The description/body of the poll",
         options="The options in the poll, format: Option1,Option2,Option3...."
     )
-    
     async def poll(self, interaction: discord.Interaction, title: str, description: str, options: str):
         opts = options.split(sep=',')
         for opt in opts:
