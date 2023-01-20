@@ -73,6 +73,25 @@ class DiscordPlace(commands.Cog):
         embed.set_image(url=f"attachment://new_crop.png")
         
         await interaction.response.send_message("Done!", embed=embed, file=f)
+    
+    def _resize_no_filter(img: Image.Image, new_size: tuple[int, int]) -> Image.Image:
+        width, height = img.size
+        ratio_width = new_size[0] // width
+        ratio_height = new_size[1] // height
+
+        pixels = {}
+
+        for row in range(width):
+            for col in range(height):
+                pixels[(row, col)] = img.getpixel((row, col))
+
+        new_img = Image.new("RGBA", new_size)
+
+        for row in range(new_size[0]):
+            for col in range(new_size[1]):
+                new_img.putpixel((row, col), pixels[row // ratio_width, col // ratio_height])
+                
+        return new_img
 
 
 async def setup(bot):
