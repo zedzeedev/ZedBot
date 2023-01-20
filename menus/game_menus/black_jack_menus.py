@@ -81,12 +81,7 @@ class BlackJackGame(TwoPlayerMenu):
     
     def create_embed(self):
         embed = discord.Embed(title="BlackJack", description="")
-        desc = ""
-        
-        # Add a emoji for each one of the first players cards
-        
-        for _ in self.player1["deck"]:
-            desc += "🟥"
+        desc = "🟥" * len(self.player1["deck"])
         
         # Check if there was a bust
             
@@ -99,14 +94,7 @@ class BlackJackGame(TwoPlayerMenu):
         
         embed.add_field(name=f"{self.player1['plr']}", value=desc)
         
-        
-        desc = ""
-        
-        # Add an emoji for each one of the second players cards
-        
-        for _ in self.player2["deck"]:
-            desc += "⬜"
-
+        desc = "⬜" * len(self.player2["deck"])
         deck_sum = sum_of_deck(self.player2["deck"])
         
         if deck_sum > 21:
@@ -115,12 +103,13 @@ class BlackJackGame(TwoPlayerMenu):
             desc += f"\nStanding: {self.player2['stay']}"
         
         embed.add_field(name=f"{self.player2['plr']}", value=desc)
-        
         embed.set_footer(text=f"It is {self.current_player['plr']}'s turn.")
         
         if self.winner != None:
             embed.remove_footer()
             embed.add_field(name="Winner!", value=f"{self.winner['plr']} has won the game of BlackJack")
+            embed.add_field(name=f"{self.player1['plr']}'s score:", value=f"{sum_of_deck(self.player1['deck'])}")
+            embed.add_field(name=f"{self.player2['plr']}'s score:", value=f"{sum_of_deck(self.player2['deck'])}")
         return embed
     
     @discord.ui.button(label="Hit")

@@ -3,7 +3,7 @@ from discord.ext import commands
 import json
 
 
-with open("config.json", "r") as config:
+with open("testing_config.json", "r") as config:
     data = json.load(config)
     token = data["token"]
     prefix = data["prefix"]
@@ -13,6 +13,7 @@ bot = commands.Bot(command_prefix=prefix, intents=discord.Intents.default())
 cogs = [
     "math",
     "poll",
+    "dplace",
     "games.connect_four",
     "games.tic_tac_toe",
     "games.blackjack"
