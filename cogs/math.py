@@ -13,8 +13,8 @@ class Math(commands.Cog):
         await interaction.response.send_message(num1 + num2)
 
     @app_commands.command(name="sqrt", description="Square root of a number")
-    async def sqrt(self, interation: discord.Interaction, num: float):
-        await interation.response.send_message(sqrt(num))
+    async def sqrt(self, interaction: discord.Interaction, num: float):
+        await interaction.response.send_message(sqrt(num))
 
     @app_commands.command(name="pow", description="Raises a number to a given power")
     async def pow(self, interaction: discord.Interaction, num: float, power: float):
